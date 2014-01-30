@@ -20,7 +20,7 @@ public class LinkedHashTable<Key, Value> : Table<Key, Value> {
     }
 
     public void Put(Key k, Value v) {
-        int hash = k.GetHashCode() % capacity;
+        int hash = Math.Abs(k.GetHashCode()) % capacity;
         List<Pair<Key, Value> > row = table[hash];
 
         bool exists = false;
@@ -33,13 +33,16 @@ public class LinkedHashTable<Key, Value> : Table<Key, Value> {
         }
 
         if (!exists) {
+            if ((double) size / capacity > loadThreshold) {
+                Rehash((int)(capacity * 1.5));
+            }
             row.Add(new Pair<Key, Value>(k, v));
             ++size;
         }
     }
 
     public bool Contains(Key k) {
-        int hash = k.GetHashCode() % capacity;
+        int hash = Math.Abs(k.GetHashCode()) % capacity;
         List<Pair<Key, Value> > row = table[hash];
         
         bool exists = false;
@@ -54,14 +57,9 @@ public class LinkedHashTable<Key, Value> : Table<Key, Value> {
     }
 
     public Value Get(Key k) {
-        if ((double) size / capacity > loadThreshold) {
-            Rehash(2 * capacity + 1);
-        }
-
-        int hash = k.GetHashCode() % capacity;
+        int hash = Math.Abs(k.GetHashCode()) % capacity;
         List<Pair<Key, Value> > row = table[hash];
         
-        bool exists = false;
         foreach (Pair<Key, Value> entry in row) {
             if (entry.First.Equals(k)) {
                 return entry.Second;
@@ -84,7 +82,7 @@ public class LinkedHashTable<Key, Value> : Table<Key, Value> {
     }
 
     IEnumerator IEnumerable.GetEnumerator() {
-        return null;
+        return GetEnumerator();
     }
 
     private void Rehash(int capacity) {
@@ -98,7 +96,7 @@ public class LinkedHashTable<Key, Value> : Table<Key, Value> {
 
         foreach (List<Pair<Key, Value> > row in table) {
             foreach(Pair<Key, Value> entry in row) {
-                int hash = entry.First.GetHashCode() % capacity;
+                int hash = Math.Abs(entry.First.GetHashCode()) % capacity;
                 newTable[hash].Add(entry);
             }
         }
@@ -115,5 +113,20 @@ public class Pair<T1, T2> {
     }
     public T1 First { get; set; }
     public T2 Second { get; set; }
+}
+
+public class TestTable {
+    public static void test() {
+        Random r = new Random();
+        LinkedHashTable<String, String> ht =
+            new LinkedHashTable<String, String>(100, .75);
+
+        string baseStr = "Key";
+
+        for (int i = 0; i < 10000; ++i) {
+            string curStr = baseStr + i.ToString();
+            ht.Put(curStr, r.Next().ToString());
+        }
+    }
 }
 }
