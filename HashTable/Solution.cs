@@ -212,14 +212,8 @@ namespace RIT_CS {
                     ht.Put(baseStr, i);
                 }
                 
-                IEnumerator<string> it = ht.GetEnumerator();
-                int count = 0;
-                while (it.MoveNext()) {
-                    count++;
-                }
-
-                Debug.Assert(count > 1);
-                Debug.Assert(ht.Get(baseStr) != 9999);
+                Debug.Assert(ht.Count == 1);
+                Debug.Assert(ht.Get(baseStr) == 9999);
             }
 
             // Insert 10000 random values to different keys
